@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Health & Study Tracker</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        background: #111827;
+        color: white;
+        padding: 20px;
+    }
+
+    .app {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .date {
+        text-align: center;
+        color: #9ca3af;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background: #1f2937;
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.25);
+    }
+
+    .workout-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .exercise {
+        background: #374151;
+        padding: 12px;
+        border-radius: 10px;
+        margin: 8px 0;
+    }
+
+    .check {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 17px;
+        margin: 15px 0;
+    }
+
+    input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        accent-color: #22c55e;
+    }
+
+    .timer {
+        text-align: center;
+        font-size: 48px;
+        font-weight: bold;
+        margin: 15px;
+    }
+
+    button {
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        margin: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        background: #22c55e;
+        color: #052e16;
+    }
+
+    button.stop {
+        background: #ef4444;
+        color: white;
+    }
+
+    button.reset {
+        background: #6b7280;
+        color: white;
+    }
+
+    .progress-bar {
+        height: 20px;
+        background: #374151;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress {
+        height: 100%;
+        width: 0%;
+        background: #22c55e;
+        transition: .3s;
+    }
+
+    .message {
+        text-align: center;
+        margin-top: 12px;
+        color: #facc15;
+        font-weight: bold;
+    }
+
+    .complete {
+        color: #4ade80;
+    }
+
+    .rest {
+        text-align: center;
+        font-size: 22px;
+        padding: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>🔥 My Daily Tracker</h1>
+    <div class="date" id="date"></div>
+
+    <!-- WORKOUT -->
+    <div class="card">
+        <div class="workout-title" id="workoutTitle"></div>
+        <div id="exercises"></div>
+
+        <label class="check">
+            <input type="checkbox" id="workoutDone">
+            Workout completed
+        </label>
+    </div>
+
+    <!-- STUDY -->
+    <div class="card">
+        <h2>📚 Study Goal</h2>
+        <p>Today's target: <b>1 hour</b></p>
+
+        <div class="timer" id="timer">60:00</div>
+
+        <div style="text-align:center">
+            <button onclick="startTimer()">▶ Start</button>
+            <button class="stop" onclick="pauseTimer()">⏸ Pause</button>
+            <button class="reset" onclick="resetTimer()">↻ Reset</button>
+        </div>
+
+        <label class="check">
+            <input type="checkbox" id="studyDone">
+            I completed my 1-hour study goal
+        </label>
+
+        <div class="message" id="studyMessage"></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="card">
+        <h2>📊 Today's Progress</h2>
+
+        <p id="progressText">0 / 2 completed</p>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+    </div>
+
+    <!-- RESET -->
+    <div class="card" style="text-align:center">
+        <button class="reset" onclick="resetDay()">Reset Today's Progress</button>
+    </div>
+
+</div>
+
+<script>
+
+const workouts = {
+    Monday: {
+        title: "🔥 PUSH DAY",
+        exercises: [
+            "Push-ups — 3 sets",
+            "Incline push-ups — 3 sets",
+            "Pike push-ups — 2 sets",
+            "Triceps dips — 2 sets",
+            "Light stretching"
+        ]
+    },
+
+    Tuesday: {
+        title: "💪 PULL DAY",
+        exercises: [
+            "Backpack rows — 3 sets",
+            "Resistance-band rows — 3 sets",
+            "Reverse fly — 2 sets",
+            "Biceps curls with light weights — 2 sets",
+            "Light stretching"
+        ]
+    },
+
+    Wednesday: {
+        title: "🦵 LEG DAY",
+        exercises: [
+            "Bodyweight squats — 3 sets",
+            "Reverse lunges — 3 sets",
+            "Glute bridges — 3 sets",
+            "Calf raises — 3 sets",
+            "Light stretching"
+        ]
+    },
+
+    Thursday: {
+        title: "🔥 PUSH DAY",
+        exercises: [
+            "Push-ups — 3 sets",
+            "Incline push-ups — 3 sets",
+            "Pike push-ups — 2 sets",
+            "Triceps dips — 2 sets",
+            "Light stretching"
+        ]
+    },
+
+    Friday: {
+        title: "💪 PULL DAY",
+        exercises: [
+            "Backpack rows — 3 sets",
+            "Resistance-band rows — 3 sets",
+            "Reverse fly — 2 sets",
+            "Biceps curls with light weights — 2 sets",
+            "Light stretching"
+        ]
+    },
+
+    Saturday: {
+        title: "🦵 LEG DAY",
+        exercises: [
+            "Bodyweight squats — 3 sets",
+            "Reverse lunges — 3 sets",
+            "Glute bridges — 3 sets",
+            "Calf raises — 3 sets",
+            "Light stretching"
+        ]
+    },
+
+    Sunday: {
+        title: "😴 REST DAY",
+        exercises: [
+            "Take a rest day",
+            "Optional easy walk",
+            "Gentle stretching"
+        ]
+    }
+};
+
+const today = new Date();
+
+const dayNames = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+];
+
+const day = dayNames[today.getDay()];
+const todayKey = today.toISOString().split("T")[0];
+
+document.getElementById("date").textContent =
+    today.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
+const workout = workouts[day];
+
+document.getElementById("workoutTitle").textContent = workout.title;
+
+const exerciseBox = document.getElementById("exercises");
+
+workout.exercises.forEach(exercise => {
+    const div = document.createElement("div");
+    div.className = "exercise";
+    div.textContent = exercise;
+    exerciseBox.appendChild(div);
+});
+
+
+// ----------------------------
+// SAVE / LOAD PROGRESS
+// ----------------------------
+
+const workoutDone = document.getElementById("workoutDone");
+const studyDone = document.getElementById("studyDone");
+
+function saveData() {
+    localStorage.setItem(
+        "tracker-" + todayKey,
+        JSON.stringify({
+            workout: workoutDone.checked,
+            study: studyDone.checked
+        })
+    );
+
+    updateProgress();
+}
+
+function loadData() {
+    const saved = localStorage.getItem("tracker-" + todayKey);
+
+    if (saved) {
+        const data = JSON.parse(saved);
+
+        workoutDone.checked = data.workout || false;
+        studyDone.checked = data.study || false;
+    }
+
+    updateProgress();
+}
+
+workoutDone.addEventListener("change", saveData);
+studyDone.addEventListener("change", saveData);
+
+
+// ----------------------------
+// PROGRESS
+// ----------------------------
+
+function updateProgress() {
+
+    let completed = 0;
+
+    if (workoutDone.checked) completed++;
+    if (studyDone.checked) completed++;
+
+    const percentage = (completed / 2) * 100;
+
+    document.getElementById("progress").style.width =
+        percentage + "%";
+
+    document.getElementById("progressText").textContent =
+        completed + " / 2 completed";
+
+    if (completed === 2) {
+        document.getElementById("progressText").className = "complete";
+    }
+}
+
+
+// ----------------------------
+// STUDY TIMER
+// ----------------------------
+
+let timeLeft = 60 * 60;
+let timer = null;
+
+function updateTimer() {
+
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    document.getElementById("timer").textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+}
+
+function startTimer() {
+
+    if (timer) return;
+
+    timer = setInterval(() => {
+
+        if (timeLeft > 0) {
+
+            timeLeft--;
+            updateTimer();
+
+        } else {
+
+            clearInterval(timer);
+            timer = null;
+
+            studyDone.checked = true;
+            saveData();
+
+            document.getElementById("studyMessage").textContent =
+                "🎉 1-hour study goal completed!";
+        }
+
+    }, 1000);
+}
+
+function pauseTimer() {
+
+    clearInterval(timer);
+    timer = null;
+}
+
+function resetTimer() {
+
+    pauseTimer();
+
+    timeLeft = 60 * 60;
+    updateTimer();
+
+    document.getElementById("studyMessage").textContent = "";
+}
+
+
+// ----------------------------
+// MISSED STUDY GOAL
+// ----------------------------
+
+function checkMissedGoal() {
+
+    if (!studyDone.checked) {
+
+        document.getElementById("studyMessage").textContent =
+            "If you miss today's goal, take a 2-hour screen break and try again tomorrow.";
+    }
+}
+
+
+// ----------------------------
+// RESET DAY
+// ----------------------------
+
+function resetDay() {
+
+    workoutDone.checked = false;
+    studyDone.checked = false;
+
+    resetTimer();
+
+    localStorage.removeItem("tracker-" + todayKey);
+
+    updateProgress();
+
+    document.getElementById("studyMessage").textContent =
+        "Today's progress has been reset.";
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
